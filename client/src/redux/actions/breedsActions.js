@@ -1,0 +1,162 @@
+// Importamos axios para las peticiones.
+import axios from 'axios';
+// Importamos nuestros actionsTypes.
+import {
+    GET_BREEDS,
+    GET_TEMPERAMENTS,
+    FILTER_BY_TEMPERAMENTS,
+    FILTER_BY_ORIGIN,
+    FILTER_BY_NAME,
+    FILTER_BY_WIEGHT,
+    SEARCH_BY_NAME,
+    SEARCH_BY_ID,
+    POST_BREED,
+    CLEAR_BREED_DETAIL,
+    DELETE_BREED,
+} from '../actionsTypes/actionsTypes.js';
+
+import { startLoading, finishLoading } from '../actions/loaderActions.js';
+
+// Traemos todas las razas.
+export const getBreeds = () => {
+    // Importante recibir el dispatch como parametro de funcion.
+    return async (dispatch) => {
+        dispatch(startLoading());
+        // Traemos todas las razas.
+        try {
+            const breeds = await axios.get('/breeds');
+            dispatch({
+                type: GET_BREEDS,
+                payload: breeds.data,
+            });
+            dispatch(finishLoading());
+        } catch (error) {
+            //Chequear esto despues....
+            console.log(error.response.data);
+        }
+    };
+};
+
+// Traemos los temperamentos.
+export const getTemperaments = () => {
+    return async (dispatch) => {
+        // Traemos todos los temperamentos.
+        const temperaments = await axios.get('/temperaments');
+        dispatch({
+            type: GET_TEMPERAMENTS,
+            payload: temperaments.data,
+        });
+    };
+};
+
+// Limpieamos el estado de breedDetail.
+export const clearBreedDetail = (payload) => {
+    return {
+        type: CLEAR_BREED_DETAIL,
+        payload,
+    };
+};
+
+// Filtramos por temperamentos.
+export const filterByTemperaments = (payload) => {
+    return {
+        type: FILTER_BY_TEMPERAMENTS,
+        payload,
+    };
+};
+
+// Filtramos por origen.
+export const filterByOrigin = (payload) => {
+    return {
+        type: FILTER_BY_ORIGIN,
+        payload,
+    };
+};
+
+// Filtramos por name.
+export const filterByName = (payload) => {
+    return {
+        type: FILTER_BY_NAME,
+        payload,
+    };
+};
+
+// Filtramos por weight.
+export const filterByWeight = (payload) => {
+    return {
+        type: FILTER_BY_WIEGHT,
+        payload,
+    };
+};
+
+// Filtramos por el nombre.
+export const searchByName = (name) => {
+    return async (dispatch) => {
+        try {
+            const resultSearch = await axios.get(
+                `/breeds/${name ? `?name=${name}` : ''}`
+            );
+            return dispatch({
+                type: SEARCH_BY_NAME,
+                payload: resultSearch.data,
+            });
+        } catch (error) {
+            const resultSearch = await axios.get('/breeds');
+            return dispatch({
+                type: SEARCH_BY_NAME,
+                payload: resultSearch.data,
+            });
+        }
+
+        // console.log(resultSearch.data);
+        // console.log(
+        //     `/breeds/${name ? `?name=${name}` : ''}`
+        // );
+    };
+};
+
+// Buscar por id.
+export const searchById = (id) => {
+    return async (dispatch) => {
+        dispatch(startLoading());
+        const resultSearch = await axios.get('/breeds/' + id);
+        // console.log(resultSearch.data);
+        dispatch({
+            type: SEARCH_BY_ID,
+            payload: resultSearch.data,
+        });
+        dispatch(finishLoading());
+    };
+};
+
+// Agregar breed.
+export const postBreed = (breed) => {
+    return async (dispatch) => {
+        const response = await axios.post('/newbreed', breed);
+        return dispatch({
+            type: POST_BREED,
+            payload: response,
+        });
+    };
+};
+//eliminar
+export const deleteBreed = (id) => {
+    return async (dispatch) => {
+      try {
+        // Realiza la solicitud DELETE al backend para eliminar la raza por su ID
+        await axios.delete(`/breeds/${id}`);
+        // Despacha la acción correspondiente en caso de éxito
+        dispatch({
+          type: DELETE_BREED,
+          payload: id,
+        });
+      } catch (error) {
+        // Manejo de errores en caso de que la eliminación falle
+        console.log(error);
+      }
+    };
+  };
+// export const postBreed = async (breed) => {
+//     const response = await axios.post('/newbreed', breed);
+//     return response;
+// };
